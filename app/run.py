@@ -43,6 +43,14 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    offer_count = len(df[df['offer']==1])
+    request_count = len(df[df['request']==1])
+    
+    aid_count = len(df[df['aid_related']==1])
+    infrastructure_count = len(df[df['infrastructure_related']==1])
+    weather_count = len(df[df['weather_related']==1])
+    
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -61,6 +69,44 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        
+        {
+            'data': [
+                Bar(
+                    x=['offer', 'request'],
+                    y=[offer_count, request_count]
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Topics ',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Topic Related"
+                }
+            }
+        },
+        
+        {
+            'data': [
+                Bar(
+                    x=['aid related', 'infrastructure related', 'weather related'],
+                    y=[aid_count, infrastructure_count, weather_count]
+                )
+            ],
+
+            'layout': {
+                'title': 'Number of Message for Request and Offer',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Request / Offer"
                 }
             }
         }
