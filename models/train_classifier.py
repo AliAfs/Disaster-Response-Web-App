@@ -14,19 +14,21 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
 
 from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 
 import pickle
 
 def load_data(database_filepath):
-    # The function reads the data from the given database
-    # Argument: 
-    #       database file path
-    # Return: 
-    #       Messages
-    #       Categories
-    #       Category names
-    #--------------------------------------
+    '''
+    The function reads the data from the given database
+    Argument: 
+           database file path
+    Return: 
+           Messages
+           Categories
+           Category names
+    '''
     
     # load data from database
     engine = create_engine('sqlite:///' + database_filepath)
@@ -66,13 +68,14 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    # The funcrion predicts on the test data and return evaluation metrics
-    # Argument:
-    #       X_test: faetures in test data
-    #       Y_test: target values(categories) in test data
-    # Retrun:
-    #       print evaluation metrics for each category
-    # ------------------------------------------------------
+    '''
+    The funcrion predicts on the test data and return evaluation metrics
+    Argument:
+           X_test: faetures in test data
+           Y_test: target values(categories) in test data
+    Retrun:
+           print evaluation metrics for each category
+    '''
     
     # predict on test data
     y_pred = model.predict(X_test)
@@ -81,6 +84,27 @@ def evaluate_model(model, X_test, Y_test, category_names):
     for i, category_name in enumerate(category_names):
         print(category_name)
         print(classification_report(Y_test[category_name], y_pred[:,i]))
+        
+    # print all evaluation metrics as average over all categories
+    accuracy = 0
+    precision = 0
+    recall = 0
+    f1_score = 0 
+    for i, category_name in enumerate(category_names):
+        accuracy += accuracy_score(Y_test[category_name], y_pred[:,i])
+        precision += float(classification_report(Y_test[category_name], y_pred[:,i])[-35:-31])
+        recall += float(classification_report(Y_test[category_name], y_pred[:,i])[-25:-21])
+        f1_score += float(classification_report(Y_test[category_name], y_pred[:,i])[-15:-11])
+
+    accuracy = accuracy/len(category_names)
+    precision = precision/len(category_names)
+    recall = recall/len(category_names)
+    f1_score = f1_score/len(category_names)
+    print('Average of each metric over all categories:')
+    print('Average accuracy:', round(accuracy, 2))
+    print('Average precision:', round(precision, 2))
+    print('Average recall:', round(recall, 2))
+    print('Average f1_score:', round(f1_score, 2))
 
 
 def save_model(model, model_filepath):
