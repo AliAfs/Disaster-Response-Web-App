@@ -13,3 +13,33 @@
 3. Run your web app: `python run.py`
 
 4. Click the `PREVIEW` button to open the homepage
+----
+### Project Overveiw:
+In this project, we are using data set containing real messages that were sent during disaster events. We create a machine learning pipeline to categorize these events so that we can send the messages to an appropriate disaster relief agency.
+
+The project includes a web app where an emergency worker can input a new message and get classification results in several categories. The web app also has three visualizations of the data.
+
+#### Project Component:
+**1. ETL Pipeline**<br>
+The Python script, `process_data.py`, implements data cleaning pipeline that:
+
+- Loads the messages and categories datasets
+- Merges the two datasets
+- Cleans the data
+- Stores it in a SQLite database
+
+**2. ML Pipeline**<br>
+The Python script, `train_classifier.py`, includes machine learning pipeline that:
+
+- Loads data from the SQLite database
+- Splits the dataset into training and test sets
+- Builds a text processing and machine learning pipeline
+- Trains and tunes a model using GridSearchCV
+- Outputs results on the test set
+- Exports the final model as a pickle file
+
+**3. Flask Web App**<br>
+A flask web app that:
+
+- Displays three data visualization using Plotly
+- Recieves text message and show the result for each category 
