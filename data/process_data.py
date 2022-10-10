@@ -3,14 +3,15 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    # The function loads relevant datasets and merges them as a single dataframe
+    '''
+    The function loads relevant datasets and merges them as a single dataframe
     
-    # Arguments: 
-    #       filte path of messages dataset
-    #       file path of categories dataset
-    # Return:
-    #       joined dataframe       
-    #---------------------------------------
+    Arguments: 
+           filte path of messages dataset
+           file path of categories dataset
+    Return:
+           joined dataframe       
+    '''
     
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
@@ -21,12 +22,13 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
-    # The function implements several cleaning steps on the the 
-    #input dataset.
+    '''
+    The function implements several cleaning steps on the the 
+    input dataset.
     
-    # Argument: dataframe
-    # Return: cleaned dataframe
-    #-----------------------------------
+    Argument: dataframe
+    Return: cleaned dataframe
+    '''
     
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(';', expand=True)
@@ -45,7 +47,11 @@ def clean_data(df):
 
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
-
+    
+    # since 'related' column have three unique values[0, 1, 2],
+    # we convert 2 values to 1 to keep all columns binary
+    categories.loc[categories["related"] == 2, "related"] = 1
+    
     # drop the original categories column from `df`
     df.drop('categories', axis=1, inplace=True)
     # concatenate the original dataframe with the new `categories` dataframe
@@ -53,17 +59,21 @@ def clean_data(df):
     
     # drop duplicates
     df.drop_duplicates(inplace=True)
+    
+    # delete rows with 'related' column value 2 to make the column values binary
+    df_final = df[df['related']!=2]
     df.reset_index(inplace=True, drop=True)
     
     return df
 
 
 def save_data(df, database_filename):
-    # The function save the input dataframe as a database
-    #in the given name
+    '''
+    The function save the input dataframe as a database
+    in the given name
     
-    # Argument: Input dataframe, database file name
-    #-------------------------------
+    Argument: Input dataframe, database file name
+    '''
     
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('cleaned_data', engine, index=False, if_exists='replace')
