@@ -1,6 +1,8 @@
 import sys
 import nltk
 nltk.download(['punkt', 'wordnet'])
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -9,7 +11,8 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 
 
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
@@ -68,10 +71,9 @@ def tokenize(text):
 
     return clean_tokens
 
-
 def build_model():
     '''
-    build a mchine learning piple line and implement gridsearch 
+    Build a mchine learning pipleline and implement gridsearch 
     to the pipeline
     
     Return:
@@ -80,16 +82,16 @@ def build_model():
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(RandomForestClassifier()))
-        ])
+        ('clf', RandomForestClassifier())
+    ])
     
     parameters = {
         'vect__ngram_range': ((1, 1), (1, 2)),
-        'clf__estimator__n_estimators': [100, 150],
-        'clf__estimator__min_samples_split': [2, 3, 4]
+        'clf__n_estimators': [100, 150],
+        'clf__min_samples_split': [2, 3, 4]
     }
 
-    pipleline_cv = GridSearchCV(pipeline, param_grid=parameters)
+    pipleline_cv = GridSearchCV(pipeline, param_grid=parameters, verbose=3)
     return pipleline_cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -133,6 +135,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    '''
+    Save model in the input file path
+    
+    Argument:
+        model:  model to be saved in the path
+        model_filepath: filepath to save the model
+        
+    Return:
+        save the model in the given directory
+    '''
+    
     # Save the model as a pickle file
     pickle.dump(model, open(model_filepath, 'wb'))
 
