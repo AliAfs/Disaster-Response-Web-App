@@ -6,6 +6,8 @@ import pandas as pd
 from sqlalchemy import create_engine
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+
 
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -21,13 +23,15 @@ import pickle
 
 def load_data(database_filepath):
     '''
-    The function reads the data from the given database
-    Argument: 
-           database file path
-    Return: 
-           Messages
-           Categories
-           Category names
+    Read the data from the given database
+    
+    Arguments: 
+        database_filepath:  file path to database file
+    
+    Returns: 
+        Messages:   dataframe containing all messages
+        Categories: dataframe containing all categories
+        Category names: list of all category names
     '''
     
     # load data from database
@@ -40,7 +44,21 @@ def load_data(database_filepath):
     return X, Y, category_names
 
 def tokenize(text):
+    '''
+    Implement text proccessing steps to the given text
+    Steps: Case normalization, Lemmatization, Tokenization, 
+    
+    Argument:
+        text:   input text
+    
+    Return:
+        clean_tokens:   proccessed and tokenized text 
+    '''
+    # tokenize text
     tokens = word_tokenize(text)
+    # remove stop words
+    tokens = [tok for tok in tokens if tok not in stopwords.words("english")]
+    # initialize lemmitizer 
     lemmatizer = WordNetLemmatizer()
     
     clean_tokens = []
@@ -52,6 +70,13 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    build a mchine learning piple line and implement gridsearch 
+    to the pipeline
+    
+    Return:
+        pipleline_cv:   machine learning pipleline having gridsearch parameters 
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -64,8 +89,8 @@ def build_model():
         'clf__estimator__min_samples_split': [2, 3, 4]
     }
 
-    cv = GridSearchCV(pipeline, param_grid=parameters)
-    return cv
+    pipleline_cv = GridSearchCV(pipeline, param_grid=parameters)
+    return pipleline_cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
     '''
