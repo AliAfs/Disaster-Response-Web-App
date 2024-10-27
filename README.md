@@ -1,7 +1,5 @@
 # Disaster Response Web App
 
-*Disaster Response Unit Pipeline Project for Udacity's Data Scientist Nanodegree Program*
-
 ![figure_eight](./img/appen.jpeg)
 
 ## Project Overveiw:
